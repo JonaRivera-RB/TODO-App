@@ -11,6 +11,7 @@ import UIKit
 
 class TaskCell: UITableViewCell {
     
+    //MARK: - Properties
     private lazy var mainView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -54,6 +55,7 @@ class TaskCell: UITableViewCell {
         return title
     }()
     
+    //MARK: -Lifecycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         

@@ -14,6 +14,10 @@ struct AppConstans {
     static let addTaskTitle = "New Task"
     static let madeWith = "Made with ❤️ by Jonathan Rivera"
     static let whatAreYouPlanning = "What are you planning?"
+    static let taskCompletionDate = "Task Completion Date"
+    static let save = "SAVE"
+    static let errorDate = "Ups, Date must be in the future"
+    
     
     struct Colors {
         static let mainColor = "#f20089"

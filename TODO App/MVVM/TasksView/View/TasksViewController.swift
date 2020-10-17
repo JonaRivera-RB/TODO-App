@@ -12,6 +12,9 @@ class TasksViewController: UIViewController {
     //MARK: - Properties
     private var addTaskButton: UIButton = {
         let button = UIButton(type: .system)
+        button.setImage(UIImage(named: "add"), for: .normal)
+        button.contentEdgeInsets = UIEdgeInsets(top: 15, left: 15, bottom: 15, right: 15)
+        button.tintColor = .white
         button.setDimensions(width: 70, height: 70)
         button.layer.cornerRadius = 70 / 2
         button.backgroundColor = AppConstans.Colors.mainColor.hexStringToUIColor()
@@ -54,17 +57,45 @@ class TasksViewController: UIViewController {
         
         return label
     }()
-
+    
+    private var emptyMessageTittleLabel: UILabel = {
+        let label = UILabel()
+        label.text = AppConstans.ups
+        label.font = UIFont.boldSystemFont(ofSize: 35)
+        return label
+    }()
+    
+    private var emptyMessageBodyLabel: UILabel = {
+        let label = UILabel()
+        label.text = AppConstans.emptyTableViewMessage
+        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private var warningImage: UIImageView = {
+        let image = UIImageView()
+        image.image = UIImage(named: "piso-mojado")
+        return image
+    }()
+    
+    private var tasksViewModel: TasksViewModel!
     
     //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tasksViewModel = TasksViewModel()
+        
         configureNavigationBar(largeTitleColor: .white, backgoundColor: AppConstans.Colors.mainColor.hexStringToUIColor(), tintColor: .white, title: AppConstans.mainTitle, preferredLargeTitle: true)
         
         righBarbutton()
         configureUI()
+        
+        tasksViewModel.retriveTasksList()
+        bind()
     }
-    
     
     //MARK: - Helpers
     private func configureUI() {
@@ -72,19 +103,37 @@ class TasksViewController: UIViewController {
         view.backgroundColor = AppConstans.Colors.backgroundColorForViews.hexStringToUIColor()
         
         view.addSubview(tableView)
-        
         tableView.anchor(top: self.view.safeAreaLayoutGuide.topAnchor, left: self.view.leftAnchor, bottom: self.view.safeAreaLayoutGuide.bottomAnchor, right: self.view.rightAnchor)
         
         view.addSubview(addTaskButton)
-        
         addTaskButton.anchor(bottom: self.view.safeAreaLayoutGuide.bottomAnchor, right: self.view.rightAnchor, paddingBottom: 20, paddingRight: 20)
+        
+        let stackMessageEmptyTasks = UIStackView(arrangedSubviews: [emptyMessageTittleLabel, emptyMessageBodyLabel])
+        stackMessageEmptyTasks.axis = .vertical
+        stackMessageEmptyTasks.distribution = .equalCentering
+        stackMessageEmptyTasks.alignment = .center
+        stackMessageEmptyTasks.spacing = 10
+        
+        view.addSubview(stackMessageEmptyTasks)
+        stackMessageEmptyTasks.center(inView: view)
+        
+        view.addSubview(warningImage)
+        warningImage.centerX(inView: view)
+        warningImage.anchor(bottom: stackMessageEmptyTasks.topAnchor, paddingBottom: 10, width: 75, height: 100)
+        
     }
     
     private func righBarbutton() {
-       let button = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchTask))
-       navigationItem.rightBarButtonItem = button
-   }
+        let button = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchTask))
+        navigationItem.rightBarButtonItem = button
+    }
     
+    private func bind() {
+        tasksViewModel.refreshData = { [weak self] in
+            self?.tableView.isHidden = ((self?.tasksViewModel.shouldHiddenTableView) != nil)
+            self?.tableView.reloadData()
+        }
+    }
     
     //MARK: - Handle
     @objc func searchTask() {
@@ -104,7 +153,7 @@ class TasksViewController: UIViewController {
 //MARK: - UITableViewDataSource, UITableViewDelegate
 extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return tasksViewModel.tasks.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -123,6 +172,6 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 70
+        return tasksViewModel.tasks.count == 0 ? 0 : 70
     }
 }

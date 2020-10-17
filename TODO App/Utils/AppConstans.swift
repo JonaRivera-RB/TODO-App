@@ -17,7 +17,8 @@ struct AppConstans {
     static let taskCompletionDate = "Task Completion Date"
     static let save = "SAVE"
     static let errorDate = "Ups, Date must be in the future"
-    
+    static let ups = "Ups"
+    static let emptyTableViewMessage = "You don't have tasks yet \n Please add tasks"
     
     struct Colors {
         static let mainColor = "#f20089"

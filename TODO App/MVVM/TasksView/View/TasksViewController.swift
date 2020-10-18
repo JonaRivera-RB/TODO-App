@@ -32,6 +32,8 @@ class TasksViewController: UIViewController {
         table.register(TaskCell.self, forCellReuseIdentifier: "cell")
         table.dataSource = self
         table.delegate = self
+        table.sectionHeaderHeight = UITableView.automaticDimension
+        table.estimatedSectionHeaderHeight = 25
         table.separatorStyle = .none
         
         return table
@@ -157,20 +159,48 @@ class TasksViewController: UIViewController {
 
 //MARK: - UITableViewDataSource, UITableViewDelegate
 extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    
+    
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        
+        let labelText = tasksViewModel.sectionTaskName[section]
+        let rect = CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 44)
+        let header = UIView(frame:rect)
+        header.backgroundColor = UIColor.clear
+        
+        let label = UILabel()
+        label.text = labelText
+        label.textColor = .black
+        label.font = UIFont(name: "Avenir-Black", size: 20) ?? UIFont.boldSystemFont(ofSize: 20)
+        header.addSubview(label)
+        label.centerY(inView: header, paddingLeft: 10)
+        
+        return header
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
         return tasksViewModel.tasks.count
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return tasksViewModel.tasks[section].count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell") as? TaskCell else { fatalError() }
         
-        cell.task = tasksViewModel.tasks[indexPath.row]
+        cell.task = tasksViewModel.tasks[indexPath.section][indexPath.row]
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         return footerView
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 40
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
@@ -192,17 +222,17 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "DELETE") { (contextualAction, view, boolValue) in
-            self.tasksViewModel.removeTask(task: self.tasksViewModel.tasks[indexPath.row])
+            self.tasksViewModel.removeTask(task: self.tasksViewModel.tasks[indexPath.section][indexPath.row])
             self.bind()
         }
         
         let addAction = UIContextualAction(style: .normal, title: "COMPLETED") { (contextualAction, view, boolValue) in
-            self.tasksViewModel.completeTask(task: self.tasksViewModel.tasks[indexPath.row])
+            self.tasksViewModel.completeTask(task: self.tasksViewModel.tasks[indexPath.section][indexPath.row])
             self.bind()
         }
         
         deleteAction.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
-        addAction.backgroundColor = #colorLiteral(red: 1, green: 0.2527923882, blue: 1, alpha: 1)
+        addAction.backgroundColor = #colorLiteral(red: 0.5568627715, green: 0.3529411852, blue: 0.9686274529, alpha: 1)
         
         let swipeActions = UISwipeActionsConfiguration(actions: [ deleteAction, addAction])
         

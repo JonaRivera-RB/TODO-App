@@ -13,11 +13,16 @@ class TasksViewModel {
     
     var refreshData = { () -> () in }
     
-    var tasks: [TASK] = [] {
+    var tasks: [[TASK]] = [] {
         didSet {
             refreshData()
         }
     }
+    
+    var sectionTaskName: [String] = ["TODO","DONE"]
+    
+    private var taskCompleted: [TASK] = []
+    private var taskNotCompleted: [TASK] = []
     
     var shouldHiddenTableView: Bool {
         return tasks.count > 0 ? false : true
@@ -28,7 +33,21 @@ class TasksViewModel {
             DispatchQueue.main.async {
                 if let tasks = tasks {
                     
-                    self.tasks = tasks.sorted(by: { self.dateFormatterForTask().date(from: $0.taskDate ?? "")! < self.dateFormatterForTask().date(from: $1.taskDate ?? "")! })
+                    self.taskCompleted.removeAll()
+                    self.taskNotCompleted.removeAll()
+                    self.tasks.removeAll()
+                    
+                    for _task in tasks {
+                        if _task.taskCompletion {
+                            self.taskCompleted.append(_task)
+                        }else {
+                            self.taskNotCompleted.append(_task)
+                        }
+                    }
+                    
+                    self.tasks.append(self.taskNotCompleted.sorted(by:  { self.dateFormatterForTask().date(from: $0.taskDate ?? "")! < self.dateFormatterForTask().date(from: $1.taskDate ?? "")! }))
+                    
+                    self.tasks.append(self.taskCompleted.sorted(by:  { self.dateFormatterForTask().date(from: $0.taskDate ?? "")! < self.dateFormatterForTask().date(from: $1.taskDate ?? "")! }))
                 }
             }
         }

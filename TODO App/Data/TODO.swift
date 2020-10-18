@@ -42,4 +42,23 @@ struct TODO {
             completion(false, nil)
         }
     }
+    
+    func saveTask(task: Task, completion:(_ completion: Bool) -> () ) {
+        guard let managedContext = appDelegate?.persistentContainer.viewContext else { return }
+        
+        let taskDatabase = TASK(context: managedContext)
+        
+        taskDatabase.taskDescription = task.taskDescription
+        taskDatabase.taskDate = task.taskDate
+        taskDatabase.taskCompletion = task.taskCompleted
+        
+        do {
+            try managedContext.save()
+            print("successfully saved task")
+            completion(true)
+        } catch {
+            debugPrint("Could not save \(error.localizedDescription)")
+            completion(false)
+        }
+    }
 }

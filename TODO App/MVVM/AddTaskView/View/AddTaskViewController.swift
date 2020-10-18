@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class TaskViewController: UIViewController {
+class AddTaskViewController: UIViewController {
     
     //MARK: - Properties
     private var mainLabel: UILabel = {
@@ -40,6 +40,7 @@ class TaskViewController: UIViewController {
         button.setTitle(AppConstans.save, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.layer.cornerRadius = 20
+        button.addTarget(self, action: #selector(saveButtonHandle), for: .touchUpInside)
         button.setTitleColor(UIColor.white, for: .normal)
         
         return button
@@ -80,8 +81,11 @@ class TaskViewController: UIViewController {
         let label = UILabel()
         label.textColor = .black
         label.text = AppConstans.errorDate
-       return label
+        return label
     }()
+    
+    private var date: String?
+    private var viewModel = AddTaskViewModel()
     
     //MARK: - Lifecycle
     override func viewDidLoad() {
@@ -92,6 +96,7 @@ class TaskViewController: UIViewController {
         hideKeyboardWhenTappedAround()
         setupNavigationBar()
         setupUI()
+        bind()
         
         taskDescriptionLabel.becomeFirstResponder()
         taskDescriptionLabel.addDoneButtonOnKeyboard()
@@ -135,10 +140,28 @@ class TaskViewController: UIViewController {
         navigationItem.leftBarButtonItem?.tintColor = .white
     }
     
+    private func bind() {
+        viewModel.refreshData = { [weak self]  success in
+            if success {
+                self?.dismiss(animated: true, completion: nil)
+            }else {
+                self?.errorView.isHidden = false
+            }
+        }
+    }
     
     //MARK: - Handlers
     @objc func cancelAction() {
         dismiss(animated: true, completion: nil)
+    }
+    
+    @objc func saveButtonHandle() {
+        guard let taskDescription = taskDescriptionLabel.text, taskDescription != "" else { return }
+        guard let taskDate = date, taskDate != "" else { return }
+        
+        let task = Task(taskDescription: taskDescription, taskDate: taskDate, taskCompleted: false)
+        viewModel.addTask(task: task)
+        viewModel.saveTask()
     }
     
     @objc func datePickerValueChanged(sender: UIDatePicker) {
@@ -147,6 +170,6 @@ class TaskViewController: UIViewController {
         dateFormatter.dateStyle = DateFormatter.Style.medium
         dateFormatter.timeStyle = DateFormatter.Style.none
         
-        print("DEBUG date \(dateFormatter.string(from: sender.date))")
+        date = dateFormatter.string(from: sender.date)
     }
 }

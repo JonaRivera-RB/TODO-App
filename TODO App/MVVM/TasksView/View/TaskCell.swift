@@ -12,6 +12,12 @@ import UIKit
 class TaskCell: UITableViewCell {
     
     //MARK: - Properties
+    
+    var task: TASK? {
+        didSet {
+            configure()
+        }
+    }
     private lazy var mainView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -30,8 +36,8 @@ class TaskCell: UITableViewCell {
         let button = UIButton(type: .system)
         button.setDimensions(width: size, height: size)
         button.layer.cornerRadius = size / 2
-        button.backgroundColor = .red
-       
+        button.layer.borderWidth = 2
+        button.layer.borderColor = UIColor.black.cgColor
         return button
     }()
     
@@ -39,20 +45,45 @@ class TaskCell: UITableViewCell {
         let title = UILabel()
         title.text = "title"
         title.numberOfLines = 0
-        title.font = UIFont.boldSystemFont(ofSize: 20)
+        title.font = UIFont(name: "Avenir-Black", size: 20) ?? UIFont.boldSystemFont(ofSize: 30)
         title.textColor = .black
         
         return title
     }()
     
     private var dateTaskLabel: UILabel = {
-        let title = UILabel()
-        title.text = "date task"
-        title.numberOfLines = 0
-        title.font = UIFont.systemFont(ofSize: 14)
-        title.textColor = .black
+        let date = UILabel()
+        date.text = "date task"
+        date.numberOfLines = 0
+        date.font = UIFont(name: "Avenir-Medium", size: 14) ?? UIFont.boldSystemFont(ofSize: 30)
+        date.textColor = .black
         
-        return title
+        return date
+    }()
+    
+    private lazy var taskCompletedBackgroundView: UIView = {
+        let view = UIView()
+        view.backgroundColor = "#d14f9f".hexStringToUIColor().withAlphaComponent(0.5)
+        view.layer.cornerRadius = 10
+        view.layer.borderWidth = 1
+        view.layer.borderColor = UIColor(white: 1.0, alpha: 0.4).cgColor
+        view.layer.shadowColor = UIColor(white: 0.0, alpha: 0.5).cgColor
+        view.layer.shadowOffset = CGSize(width: 3.0, height: 3.0)
+        view.layer.shadowOpacity = 0.27
+        view.layer.shadowRadius = 3.0
+        
+        view.addSubview(taskCompleteLabel)
+        taskCompleteLabel.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5)
+        return view
+    }()
+    
+    private var taskCompleteLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: "Avenir-Black", size: 30) ?? UIFont.boldSystemFont(ofSize: 30)
+        label.text = "COMPLETED"
+        label.textAlignment = .center
+        label.textColor = .white
+        return label
     }()
     
     //MARK: -Lifecycle
@@ -75,9 +106,21 @@ class TaskCell: UITableViewCell {
         mainView.addSubview(stack)
         stack.anchor(top: mainView.topAnchor, left: doneButton.rightAnchor, bottom: mainView.bottomAnchor, right: mainView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 5, paddingRight: 10)
         
+        addSubview(taskCompletedBackgroundView)
+        taskCompletedBackgroundView.anchor(top: self.topAnchor, left: self.leftAnchor, bottom: self.bottomAnchor, right: self.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 5, paddingRight: 10)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func configure() {
+        guard let task = task else { return }
+        let viewModel = TaskCellViewModel(task: task)
+        
+        titleTaskLabel.text = viewModel.description
+        dateTaskLabel.text = viewModel.date
+        doneButton.backgroundColor = viewModel.doneButtonBackgroundColor
+        taskCompletedBackgroundView.isHidden = viewModel.isHiddenBackgroundView
     }
 }

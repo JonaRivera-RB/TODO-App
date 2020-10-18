@@ -80,18 +80,20 @@ class TasksViewController: UIViewController {
         return image
     }()
     
-    private var tasksViewModel: TasksViewModel!
+    private var tasksViewModel = TasksViewModel()
     
     //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tasksViewModel = TasksViewModel()
-        
         configureNavigationBar(largeTitleColor: .white, backgoundColor: AppConstans.Colors.mainColor.hexStringToUIColor(), tintColor: .white, title: AppConstans.mainTitle, preferredLargeTitle: true)
         
         righBarbutton()
         configureUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
         
         tasksViewModel.retriveTasksList()
         bind()
@@ -119,7 +121,7 @@ class TasksViewController: UIViewController {
         
         view.addSubview(warningImage)
         warningImage.centerX(inView: view)
-        warningImage.anchor(bottom: stackMessageEmptyTasks.topAnchor, paddingBottom: 10, width: 75, height: 100)
+        warningImage.anchor(bottom: stackMessageEmptyTasks.topAnchor, paddingBottom: 10, width: 80, height: 100)
         
     }
     
@@ -130,7 +132,10 @@ class TasksViewController: UIViewController {
     
     private func bind() {
         tasksViewModel.refreshData = { [weak self] in
-            self?.tableView.isHidden = ((self?.tasksViewModel.shouldHiddenTableView) != nil)
+            self?.tableView.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? false : true
+            self?.warningImage.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? true : false
+            self?.emptyMessageTittleLabel.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? true : false
+            self?.emptyMessageBodyLabel.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? true : false
             self?.tableView.reloadData()
         }
     }
@@ -141,7 +146,7 @@ class TasksViewController: UIViewController {
     }
     
     @objc func addTaskButtonTapped() {
-        let controller = TaskViewController()
+        let controller = AddTaskViewController()
         
         let nav = UINavigationController(rootViewController: controller)
         nav.modalPresentationStyle = .fullScreen
@@ -159,6 +164,8 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell") as? TaskCell else { fatalError() }
         
+        cell.task = tasksViewModel.tasks[indexPath.row]
+        
         return cell
     }
     
@@ -172,6 +179,6 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return tasksViewModel.tasks.count == 0 ? 0 : 70
+        return 80
     }
 }

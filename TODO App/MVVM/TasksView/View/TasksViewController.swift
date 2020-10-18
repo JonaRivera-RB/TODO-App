@@ -181,4 +181,32 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
     }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        .none
+    }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "DELETE") { (contextualAction, view, boolValue) in
+            self.tasksViewModel.removeTask(task: self.tasksViewModel.tasks[indexPath.row])
+            self.bind()
+        }
+        
+        let addAction = UIContextualAction(style: .normal, title: "COMPLETED") { (contextualAction, view, boolValue) in
+            self.tasksViewModel.completeTask(task: self.tasksViewModel.tasks[indexPath.row])
+            self.bind()
+        }
+        
+        deleteAction.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
+        addAction.backgroundColor = #colorLiteral(red: 1, green: 0.2527923882, blue: 1, alpha: 1)
+        
+        let swipeActions = UISwipeActionsConfiguration(actions: [ deleteAction, addAction])
+        
+        return swipeActions
+    }
+    
 }

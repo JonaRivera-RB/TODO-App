@@ -32,4 +32,22 @@ class TasksViewModel {
             }
         }
     }
+    
+    func removeTask(task: TASK) {
+        TODO.shared.removeTask(task: task) { _ in
+            DispatchQueue.main.async {
+                self.retriveTasksList()
+            }
+        }
+    }
+    
+    func completeTask(task: TASK) {
+        TODO.shared.completeTask(task: task) { success in
+            DispatchQueue.main.async {
+                if success {
+                    self.retriveTasksList()
+                }
+            }
+        }
+    }
 }

@@ -15,21 +15,12 @@ let appDelegate = UIApplication.shared.delegate as? AppDelegate
 struct TODO {
     
     static let shared = TODO()
-//    func removeGoal(atIndexPath indexPath: IndexPath) {
-//        guard let managedContext = appDelegate?.persistentContainer.viewContext else { return }
-//
-//        managedContext.delete(goals[indexPath.row])
-//
-//        do {
-//            try managedContext.save()
-//            print("Successfully removed goal!")
-//        } catch {
-//            debugPrint("Could not remove: \(error.localizedDescription)")
-//        }
-//    }
     
     func fetch(completion: (_ complete: Bool,_ task: [TASK]?) -> ()) {
-        guard let managedContext = appDelegate?.persistentContainer.viewContext else { return }
+        guard let managedContext = appDelegate?.persistentContainer.viewContext else {
+            completion(false, nil)
+            return
+        }
         
         let fetchRequest = NSFetchRequest<TASK>(entityName: "TASK")
         
@@ -44,7 +35,10 @@ struct TODO {
     }
     
     func saveTask(task: Task, completion:(_ completion: Bool) -> () ) {
-        guard let managedContext = appDelegate?.persistentContainer.viewContext else { return }
+        guard let managedContext = appDelegate?.persistentContainer.viewContext else {
+            completion(false)
+            return
+        }
         
         let taskDatabase = TASK(context: managedContext)
         
@@ -58,6 +52,44 @@ struct TODO {
             completion(true)
         } catch {
             debugPrint("Could not save \(error.localizedDescription)")
+            completion(false)
+        }
+    }
+    
+    func removeTask(task: TASK, completion:(_ completion: Bool ) -> () ) {
+        guard let managedContext = appDelegate?.persistentContainer.viewContext else {
+            completion(false)
+            return
+        }
+        
+        managedContext.delete(task)
+        
+        do {
+            try managedContext.save()
+            print("Successfully removed task")
+            completion(true)
+        }catch {
+            debugPrint("Could not remove: \(error.localizedDescription)")
+            completion(false)
+        }
+    }
+    
+    func completeTask(task: TASK, completion:(_ completion: Bool) -> () ) {
+        guard let managedContext = appDelegate?.persistentContainer.viewContext else {
+            completion(false)
+            return
+        }
+        
+        if task.taskCompletion == false {
+            task.taskCompletion = true
+        }
+        
+        do {
+            try managedContext.save()
+            print("Successfully completed")
+            completion(true)
+        }catch {
+            debugPrint("Could not completed \(error.localizedDescription)")
             completion(false)
         }
     }

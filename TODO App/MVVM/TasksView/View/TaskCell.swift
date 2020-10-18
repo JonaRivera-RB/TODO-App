@@ -36,8 +36,14 @@ class TaskCell: UITableViewCell {
         let button = UIButton(type: .system)
         button.setDimensions(width: size, height: size)
         button.layer.cornerRadius = size / 2
-        button.layer.borderWidth = 2
+        button.layer.borderWidth = 0.5
         button.layer.borderColor = UIColor.black.cgColor
+        button.layer.shadowColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25).cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 1)
+        button.layer.shadowOpacity = 1.0
+        button.layer.shadowRadius =  size / 2
+        button.layer.masksToBounds = false
+        
         return button
     }()
     

@@ -18,7 +18,7 @@ struct TaskCellViewModel {
     }
     
     var doneButtonBackgroundColor: UIColor {
-        return task.taskCompletion ? .red : .white
+        return task.taskCompletion ? AppConstans.Colors.mainColor.hexStringToUIColor() : .white
     }
     
     var description: String {

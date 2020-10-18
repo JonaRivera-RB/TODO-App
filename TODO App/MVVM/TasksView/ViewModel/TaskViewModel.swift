@@ -27,7 +27,8 @@ class TasksViewModel {
         TODO.shared.fetch { _, tasks in
             DispatchQueue.main.async {
                 if let tasks = tasks {
-                    self.tasks = tasks
+                    
+                    self.tasks = tasks.sorted(by: { self.dateFormatterForTask().date(from: $0.taskDate ?? "")! < self.dateFormatterForTask().date(from: $1.taskDate ?? "")! })
                 }
             }
         }
@@ -49,5 +50,14 @@ class TasksViewModel {
                 }
             }
         }
+    }
+    
+    func dateFormatterForTask() -> DateFormatter {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = DateFormatter.Style.medium
+        dateFormatter.timeStyle = DateFormatter.Style.none
+        
+        return dateFormatter
     }
 }

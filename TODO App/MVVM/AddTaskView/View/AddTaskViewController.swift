@@ -79,8 +79,9 @@ class AddTaskViewController: UIViewController {
     
     private lazy var errorLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
+        label.textColor = .white
         label.text = AppConstans.errorDate
+        label.font = UIFont(name: "Avenir-Black", size: 20) ?? UIFont.boldSystemFont(ofSize: 30)
         return label
     }()
     
@@ -156,8 +157,19 @@ class AddTaskViewController: UIViewController {
     }
     
     @objc func saveButtonHandle() {
-        guard let taskDescription = taskDescriptionLabel.text, taskDescription != "" else { return }
-        guard let taskDate = date, taskDate != "" else { return }
+        guard let taskDescription = taskDescriptionLabel.text, taskDescription != "" else {
+            self.errorView.isHidden = false
+            self.errorLabel.text = AppConstans.emptyTaskDescription
+            hiddenErrorView()
+            return
+        }
+        
+        guard let taskDate = date, taskDate != "" else {
+            self.errorView.isHidden = false
+            self.errorLabel.text = AppConstans.emptyTaskDate
+            hiddenErrorView()
+            return
+        }
         
         let task = Task(taskDescription: taskDescription, taskDate: taskDate, taskCompleted: false)
         viewModel.addTask(task: task)
@@ -171,5 +183,21 @@ class AddTaskViewController: UIViewController {
         dateFormatter.timeStyle = DateFormatter.Style.none
         
         date = dateFormatter.string(from: sender.date)
+        let completionDate: Date = sender.date
+        
+        if completionDate < Date() {
+            self.errorView.isHidden = false
+            self.errorLabel.text = AppConstans.errorDate
+            hiddenErrorView()
+        }
+    }
+    
+    func hiddenErrorView() {
+        UIView.animate(withDuration: 3, animations: {
+            self.errorView.alpha = 0
+        }) { (finished) in
+            self.errorView.isHidden = finished
+            self.errorView.alpha = 1
+        }
     }
 }

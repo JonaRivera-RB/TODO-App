@@ -83,6 +83,10 @@ class TasksViewController: UIViewController {
     }()
     
     private var tasksViewModel = TasksViewModel()
+    private let searchController = UISearchController(searchResultsController: nil)
+    private var isSearchMode: Bool {
+        return searchController.isActive && !searchController.searchBar.text!.isEmpty
+    }
     
     //MARK: - Lifecycle
     override func viewDidLoad() {
@@ -90,7 +94,7 @@ class TasksViewController: UIViewController {
         
         configureNavigationBar(largeTitleColor: .white, backgoundColor: AppConstans.Colors.mainColor.hexStringToUIColor(), tintColor: .white, title: AppConstans.mainTitle, preferredLargeTitle: true)
         
-        righBarbutton()
+        setupSearchControllerInNavigationController()
         configureUI()
     }
     
@@ -101,7 +105,7 @@ class TasksViewController: UIViewController {
         bind()
     }
     
-    //MARK: - Helpers
+    //MARK: - UI
     private func configureUI() {
         
         view.backgroundColor = AppConstans.Colors.backgroundColorForViews.hexStringToUIColor()
@@ -127,11 +131,35 @@ class TasksViewController: UIViewController {
         
     }
     
-    private func righBarbutton() {
-        let button = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchTask))
-        navigationItem.rightBarButtonItem = button
+    private func setupSearchControllerInNavigationController() {
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        let scb = searchController.searchBar
+        scb.tintColor = UIColor.white
+        scb.barTintColor = UIColor.white
+        
+        if let textfield = scb.value(forKey: "searchField") as? UITextField {
+            textfield.textColor = UIColor.white
+            textfield.backgroundColor = UIColor.white
+            
+            if let backgroundview = textfield.subviews.first {
+                backgroundview.backgroundColor = UIColor.white
+                backgroundview.layer.cornerRadius = 10
+                backgroundview.clipsToBounds = true
+            }
+            
+        }
+        
+        if let navigationbar = self.navigationController?.navigationBar {
+            navigationbar.barTintColor = AppConstans.Colors.mainColor.hexStringToUIColor()
+        }
+        
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
     }
     
+    //MARK: - Helpers
     private func bind() {
         tasksViewModel.refreshData = { [weak self] in
             self?.tableView.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? false : true
@@ -164,14 +192,14 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         
-        let labelText = tasksViewModel.sectionTaskName[section]
+        let labelText = tasksViewModel.nameForSections[section]
         let rect = CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 44)
         let header = UIView(frame:rect)
         header.backgroundColor = UIColor.clear
         
         let label = UILabel()
         label.text = labelText
-        label.textColor = .black
+        label.textColor = .lightGray
         label.font = UIFont(name: "Avenir-Black", size: 20) ?? UIFont.boldSystemFont(ofSize: 20)
         header.addSubview(label)
         label.centerY(inView: header, paddingLeft: 10)
@@ -180,17 +208,17 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return tasksViewModel.tasks.count
+        return isSearchMode ? 1 : tasksViewModel.tasks.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tasksViewModel.tasks[section].count
+        return isSearchMode ? tasksViewModel.filteredTask.count : tasksViewModel.tasks[section].count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell") as? TaskCell else { fatalError() }
         
-        cell.task = tasksViewModel.tasks[indexPath.section][indexPath.row]
+        cell.task = isSearchMode ? tasksViewModel.filteredTask[indexPath.row] : tasksViewModel.tasks[indexPath.section][indexPath.row]
         
         return cell
     }
@@ -200,7 +228,8 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 40
+        let sizeheightHeader = 40
+        return CGFloat(sizeheightHeader)
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
@@ -209,7 +238,8 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+        let sizeHeight = 80
+        return CGFloat(sizeHeight)
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -237,6 +267,18 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
         let swipeActions = UISwipeActionsConfiguration(actions: [ deleteAction, addAction])
         
         return swipeActions
+    }
+}
+
+extension TasksViewController: UISearchResultsUpdating {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text else { return }
+        
+        tasksViewModel.filteredTask = tasksViewModel.tasks[0].filter({ ($0.taskDescription?.contains(searchText) ?? false)
+        })
+        
+        bind()
     }
     
 }

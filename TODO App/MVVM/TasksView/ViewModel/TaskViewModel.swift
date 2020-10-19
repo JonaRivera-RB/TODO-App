@@ -13,13 +13,19 @@ class TasksViewModel {
     
     var refreshData = { () -> () in }
     
+    var filteredTask = [TASK]() {
+        didSet {
+            refreshData()
+        }
+    }
+    
     var tasks: [[TASK]] = [] {
         didSet {
             refreshData()
         }
     }
     
-    var sectionTaskName: [String] = ["TODO","DONE"]
+    var nameForSections: [String] = ["TO DO","DONE"]
     
     private var taskCompleted: [TASK] = []
     private var taskNotCompleted: [TASK] = []

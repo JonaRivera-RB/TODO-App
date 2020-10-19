@@ -242,7 +242,7 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let sizeHeight = 80
+        let sizeHeight = 85
         return CGFloat(sizeHeight)
     }
     

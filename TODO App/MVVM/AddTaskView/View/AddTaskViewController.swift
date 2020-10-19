@@ -85,14 +85,15 @@ class AddTaskViewController: UIViewController {
         return label
     }()
     
-    private var task: TASK?
+    private var oldTask: TASK?
     private var date: String?
     private var viewModel = AddTaskViewModel()
+    private var isUpdateTask: Bool = false
     
     //MARK: - Lifecycle
     
     init(task: TASK?) {
-        self.task = task
+        self.oldTask = task
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -110,6 +111,7 @@ class AddTaskViewController: UIViewController {
         setupNavigationBar()
         setupUI()
         bind()
+        setupUIWithData()
         
         taskDescriptionLabel.becomeFirstResponder()
         taskDescriptionLabel.addDoneButtonOnKeyboard()
@@ -163,6 +165,16 @@ class AddTaskViewController: UIViewController {
         }
     }
     
+    private func setupUIWithData() {
+        guard let task = oldTask else { return }
+        isUpdateTask = true
+        taskDescriptionLabel.text = task.taskDescription
+        date = task.taskDate
+        
+        let completionDate: Date =  dateFormatterForTask().date(from: task.taskDate ?? "")!
+        taskCompletionDate.setDate(completionDate, animated: true)
+    }
+    
     //MARK: - Handlers
     @objc func cancelAction() {
         dismiss(animated: true, completion: nil)
@@ -184,8 +196,7 @@ class AddTaskViewController: UIViewController {
         }
         
         let task = Task(taskDescription: taskDescription, taskDate: taskDate, taskCompleted: false)
-        viewModel.addTask(task: task)
-        viewModel.saveTask()
+        isUpdateTask ? viewModel.updateTask(oldTask: oldTask, task: task) :viewModel.saveTask(task: task)
     }
     
     @objc func datePickerValueChanged(sender: UIDatePicker) {
@@ -211,5 +222,14 @@ class AddTaskViewController: UIViewController {
             self.errorView.isHidden = finished
             self.errorView.alpha = 1
         }
+    }
+    
+    func dateFormatterForTask() -> DateFormatter {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = DateFormatter.Style.medium
+        dateFormatter.timeStyle = DateFormatter.Style.none
+        
+        return dateFormatter
     }
 }

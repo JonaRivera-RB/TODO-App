@@ -10,8 +10,6 @@ import Foundation
 
 class AddTaskViewModel {
     
-    var task: Task?
-    
     var refreshData = { (success: Bool) -> () in }
     
     private var taskSavedCorrectly: Bool = Bool() {
@@ -20,13 +18,17 @@ class AddTaskViewModel {
         }
     }
     
-    func addTask(task: Task) {
-        self.task = task
+    func saveTask(task: Task) {
+        TODO.shared.saveTask(task: task) { success in
+            DispatchQueue.main.async {
+                self.taskSavedCorrectly = success
+            }
+        }
     }
     
-    func saveTask() {
-        guard let task = task else { return }
-        TODO.shared.saveTask(task: task) { success in
+    func updateTask(oldTask: TASK?, task: Task) {
+        guard let oldTask = oldTask else { return }
+        TODO.shared.updateTask(oldTask: oldTask, task: task) { success in
             DispatchQueue.main.async {
                 self.taskSavedCorrectly = success
             }

@@ -93,4 +93,24 @@ struct TODO {
             completion(false)
         }
     }
+    
+    func updateTask(oldTask: TASK, task: Task, completion:(_ completion: Bool) -> () ) {
+        guard let managedContext = appDelegate?.persistentContainer.viewContext else {
+            completion(false)
+            return
+        }
+        
+        oldTask.taskDescription = task.taskDescription
+        oldTask.taskDate = task.taskDate
+        oldTask.taskCompletion = task.taskCompleted
+        
+        do {
+            try managedContext.save()
+            print("Successfully completed")
+            completion(true)
+        }catch {
+            debugPrint("Could not completed \(error.localizedDescription)")
+            completion(false)
+        }
+    }
 }

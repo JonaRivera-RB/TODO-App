@@ -31,7 +31,11 @@ class TasksViewModel {
     private var taskNotCompleted: [TASK] = []
     
     var shouldHiddenTableView: Bool {
-        return tasks.count > 0 ? false : true
+        return taskCompleted.count > 0 || taskNotCompleted.count > 0 ? false : true
+    }
+    
+    var shouldHiddenMessageEmpty: Bool {
+        return taskCompleted.count > 0 || taskNotCompleted.count > 0 ? true : false
     }
     
     func retriveTasksList() {

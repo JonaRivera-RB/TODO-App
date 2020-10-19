@@ -162,12 +162,20 @@ class TasksViewController: UIViewController {
     //MARK: - Helpers
     private func bind() {
         tasksViewModel.refreshData = { [weak self] in
-            self?.tableView.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? false : true
-            self?.warningImage.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? true : false
-            self?.emptyMessageTittleLabel.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? true : false
-            self?.emptyMessageBodyLabel.isHidden = self?.tasksViewModel.tasks.count ?? 0 > 0 ? true : false
+            self?.tableView.isHidden = self?.tasksViewModel.shouldHiddenTableView ?? false
+            self?.warningImage.isHidden = self?.tasksViewModel.shouldHiddenMessageEmpty ?? false
+            self?.emptyMessageTittleLabel.isHidden = self?.tasksViewModel.shouldHiddenMessageEmpty ?? false
+            self?.emptyMessageBodyLabel.isHidden = self?.tasksViewModel.shouldHiddenMessageEmpty ?? false
             self?.tableView.reloadData()
         }
+    }
+    
+    func openAddTaskViewController(task: TASK? = nil) {
+        let controller = AddTaskViewController(task: task)
+        
+        let nav = UINavigationController(rootViewController: controller)
+        nav.modalPresentationStyle = .fullScreen
+        present(nav, animated: true, completion: nil)
     }
     
     //MARK: - Handle
@@ -176,11 +184,7 @@ class TasksViewController: UIViewController {
     }
     
     @objc func addTaskButtonTapped() {
-        let controller = AddTaskViewController()
-        
-        let nav = UINavigationController(rootViewController: controller)
-        nav.modalPresentationStyle = .fullScreen
-        present(nav, animated: true, completion: nil)
+        openAddTaskViewController()
     }
 }
 
@@ -267,6 +271,11 @@ extension TasksViewController: UITableViewDataSource, UITableViewDelegate {
         let swipeActions = UISwipeActionsConfiguration(actions: [ deleteAction, addAction])
         
         return swipeActions
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let task = isSearchMode ? tasksViewModel.filteredTask[indexPath.row] : tasksViewModel.tasks[indexPath.section][indexPath.row]
+        openAddTaskViewController(task: task)
     }
 }
 
